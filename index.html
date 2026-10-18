@@ -1,0 +1,541 @@
+<!doctype html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Who Killed Santa?">
+<meta name="theme-color" content="#16241f">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" href="/icon-192.png">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Who Killed Santa?</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap">
+<style>
+/* Layout: a case-file app. Sticky header, one panel per tab, bottom tab bar on phones, top tabs on wide screens. */
+:root{
+  --bg:#eef2f1;        /* frosted window */
+  --paper:#ffffff;
+  --ink:#16241f;       /* pine ink */
+  --muted:#5b6b65;
+  --line:#d5dedb;
+  --red:#b3202f;       /* evidence-tag cranberry */
+  --red-soft:#f7e3e5;
+  --pine:#1f5a45;
+  --pine-soft:#dcebe4;
+  --gold:#a7781c;
+  --gold-soft:#f5ebd3;
+  --tag:#fff7d6;
+  --shadow:0 1px 2px rgba(22,36,31,.08),0 4px 14px rgba(22,36,31,.06);
+  --f-display:"Special Elite","Courier New",Courier,monospace;
+  --f-body:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0f1916;--paper:#17241f;--ink:#e6efeb;--muted:#97a9a2;--line:#2a3b35;
+  --red:#e2596a;--red-soft:#3a1d22;--pine:#6fc39f;--pine-soft:#1d3a2f;--gold:#e0b65a;--gold-soft:#3a3018;--tag:#3a3418;
+  --shadow:0 1px 2px rgba(0,0,0,.4);color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f1916;--paper:#17241f;--ink:#e6efeb;--muted:#97a9a2;--line:#2a3b35;
+  --red:#e2596a;--red-soft:#3a1d22;--pine:#6fc39f;--pine-soft:#1d3a2f;--gold:#e0b65a;--gold-soft:#3a3018;--tag:#3a3418;
+  --shadow:0 1px 2px rgba(0,0,0,.4);color-scheme:dark}
+
+*{box-sizing:border-box}
+html,body{background:var(--bg);color:var(--ink)}
+body{font-family:var(--f-body);font-size:16px;line-height:1.5;-webkit-tap-highlight-color:transparent}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--ink)}
+h1,h2,h3{font-family:var(--f-display);font-weight:400;line-height:1.15;text-wrap:balance;margin:0}
+h2{font-size:1.5rem}
+h3{font-size:1.15rem}
+p{margin:0}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.wrap{max-width:960px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+
+/* header */
+header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--ink);color:#f3efe6}
+:root[data-theme="dark"] header.top{background:#0a110f}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) header.top{background:#0a110f}}
+.top .wrap{display:flex;align-items:center;gap:12px;padding-block:10px}
+.brand{display:flex;flex-direction:column;min-width:0}
+.brand h1{font-size:1.35rem;color:#fff}
+.brand small{font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:#d9a9ad}
+.stamp{margin-left:auto;font-family:var(--f-display);font-size:.75rem;letter-spacing:.12em;border:2px solid #e2596a;color:#ffb3bb;padding:3px 8px;transform:rotate(-4deg);white-space:nowrap}
+nav.tabs{display:none}
+nav.tabs button{background:none;border:0;color:#cfd8d4;padding:10px 14px;border-bottom:3px solid transparent;font-weight:700;font-size:.95rem}
+nav.tabs button[aria-selected="true"]{color:#fff;border-bottom-color:#e2596a}
+@media (min-width:760px){
+  nav.tabs{display:flex;gap:4px}
+  nav.bottom{display:none!important}
+  .top .wrap{flex-wrap:wrap;padding-bottom:0}
+  nav.tabs{width:100%}
+}
+
+/* bottom nav */
+nav.bottom{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--paper);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(5,1fr);padding:4px max(4px,env(safe-area-inset-left,0px)) calc(4px + env(safe-area-inset-bottom,0px)) max(4px,env(safe-area-inset-right,0px))}
+nav.bottom button{background:none;border:0;display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 2px;font-size:.7rem;font-weight:700;color:var(--muted);border-radius:10px}
+nav.bottom button svg{width:22px;height:22px}
+nav.bottom button[aria-selected="true"]{color:var(--red);background:var(--red-soft)}
+
+main{padding-block:20px 110px}
+@media (min-width:760px){main{padding-block:28px 60px}}
+section.panel{display:flex;flex-direction:column;gap:20px}
+.lede{font-size:1.05rem;max-width:62ch}
+.eyebrow{font-size:.72rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--red)}
+.box{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:16px;box-shadow:var(--shadow)}
+.stack{display:flex;flex-direction:column;gap:12px}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.muted{color:var(--muted)}
+.btn{background:var(--paper);border:1.5px solid var(--line);border-radius:999px;padding:8px 14px;font-weight:700;font-size:.9rem}
+.btn.primary{background:var(--red);border-color:var(--red);color:#fff}
+.btn.pine{background:var(--pine);border-color:var(--pine);color:#fff}
+:root[data-theme="dark"] .btn.pine,:root[data-theme="dark"] .btn.primary{color:#0f1916}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .btn.pine,:root:not([data-theme="light"]) .btn.primary{color:#0f1916}}
+.btn.sm{padding:5px 10px;font-size:.8rem}
+
+/* briefing */
+.brief{font-family:var(--f-display);font-size:1.05rem;line-height:1.6;background:var(--tag);border:1px solid var(--line);border-left:6px solid var(--gold);padding:16px 18px;border-radius:4px 12px 12px 4px}
+
+/* suspect cards */
+.grid-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
+.suspect{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:14px 14px 14px 16px;display:flex;flex-direction:column;gap:8px;position:relative;overflow:hidden;min-width:0}
+.suspect .num{position:absolute;top:10px;right:12px;font-family:var(--f-display);color:var(--muted);font-size:.8rem}
+.suspect h3{padding-right:28px}
+.suspect .who{font-size:.85rem;color:var(--muted)}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 10px;font-size:.9rem}
+.kv dt{font-weight:700;color:var(--red);font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;padding-top:3px}
+.kv dd{margin:0}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{background:var(--paper);border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-size:.9rem}
+.chip b{color:var(--pine)}
+
+/* notebook grid */
+.teampick{display:flex;gap:6px;flex-wrap:wrap}
+.teampick button{border:1.5px solid var(--line);background:var(--paper);border-radius:999px;padding:7px 14px;font-weight:700}
+.teampick button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.nb-cols{display:grid;gap:12px;grid-template-columns:1fr}
+@media (min-width:760px){.nb-cols{grid-template-columns:repeat(3,1fr)}}
+.nb-list{display:flex;flex-direction:column;gap:6px}
+.nb-item{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:var(--paper);border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;min-height:46px}
+.nb-item .mark{width:28px;height:28px;flex:none;border-radius:6px;border:1.5px dashed var(--line);display:grid;place-items:center;font-weight:700;font-family:var(--f-display);font-size:1.1rem}
+.nb-item[data-s="x"]{opacity:.55}
+.nb-item[data-s="x"] .label{text-decoration:line-through}
+.nb-item[data-s="x"] .mark{border-style:solid;color:var(--muted)}
+.nb-item[data-s="q"]{border-color:var(--gold);background:var(--gold-soft)}
+.nb-item[data-s="q"] .mark{border:1.5px solid var(--gold);color:var(--gold)}
+.nb-item[data-s="y"]{border-color:var(--red);background:var(--red-soft)}
+.nb-item[data-s="y"] .mark{border:1.5px solid var(--red);background:var(--red);color:#fff}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:.85rem;color:var(--muted)}
+.clue-ticks{display:grid;grid-template-columns:repeat(auto-fill,minmax(52px,1fr));gap:6px}
+.clue-ticks button{border:1.5px solid var(--line);background:var(--paper);border-radius:8px;padding:8px 0;font-family:var(--f-display);font-size:1rem}
+.clue-ticks button[aria-pressed="true"]{background:var(--pine);border-color:var(--pine);color:#fff}
+textarea{width:100%;min-height:110px;font:inherit;background:var(--paper);color:var(--ink);border:1.5px solid var(--line);border-radius:10px;padding:10px}
+input[type=text],input[type=password],input:not([type]){font:inherit;color:var(--ink);background:var(--paper);border:1.5px solid var(--line);border-radius:10px;padding:9px 12px;width:100%}
+.decoded{font-family:var(--f-display);font-size:1.15rem;letter-spacing:.06em;background:var(--tag);border-radius:8px;padding:10px 12px;min-height:46px;word-break:break-word}
+
+/* missions */
+.mission{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:14px}
+.mission .code{grid-row:span 3;font-family:var(--f-display);font-size:1.2rem;background:var(--red);color:#fff;border-radius:8px;width:48px;height:48px;display:grid;place-items:center}
+.mission.show .code{background:var(--gold)}
+.mission .meta{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:.85rem}
+.mission .meta span b{color:var(--pine)}
+.mission .acts{grid-column:2;display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+
+/* timer overlay */
+.timer{position:fixed;inset:0;z-index:50;background:var(--ink);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;padding:calc(20px + env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) calc(20px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));text-align:center}
+.timer .t-name{font-family:var(--f-display);font-size:1.4rem;color:#ffb3bb}
+.timer .t-digits{font-family:var(--f-display);font-size:clamp(5rem,26vw,13rem);line-height:1;font-variant-numeric:tabular-nums}
+.timer.done .t-digits{color:#ff6b7b;animation:pulse 1s infinite}
+@keyframes pulse{50%{opacity:.35}}
+@media (prefers-reduced-motion:reduce){.timer.done .t-digits{animation:none}}
+.timer .row button{background:#fff;color:#16241f;border:0;border-radius:999px;padding:12px 22px;font-weight:700;font-size:1.05rem}
+.timer .row button.ghost{background:transparent;color:#fff;border:2px solid #5d7068}
+
+/* scores */
+.teams{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(260px,1fr))}
+.team{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.team.lead{border:2px solid var(--gold)}
+.team .head{display:flex;align-items:center;gap:10px}
+.team .head input{font-family:var(--f-display);font-size:1.1rem;padding:6px 8px;border-color:transparent;background:transparent}
+.team .head input:focus{border-color:var(--line)}
+.team .total{margin-left:auto;font-family:var(--f-display);font-size:2rem;font-variant-numeric:tabular-nums;min-width:2.5ch;text-align:right}
+.team .rank{font-size:.7rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--gold)}
+.pts{display:flex;flex-direction:column;gap:6px}
+.pt{display:grid;grid-template-columns:1fr auto auto auto;align-items:center;gap:6px;font-size:.88rem}
+.pt .n{font-variant-numeric:tabular-nums;min-width:2.2ch;text-align:center;font-weight:700}
+.pt button{width:34px;height:34px;border-radius:8px;border:1.5px solid var(--line);background:var(--bg);font-weight:700;font-size:1.1rem;line-height:1}
+.pt.tog button.on{background:var(--pine);border-color:var(--pine);color:#fff}
+
+/* GM */
+.lock{max-width:380px}
+.solution{background:var(--red-soft);border:2px solid var(--red);border-radius:12px;padding:16px}
+.solution .big{font-family:var(--f-display);font-size:1.35rem;line-height:1.35}
+.tbl{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--paper)}
+table{border-collapse:collapse;width:100%;font-size:.9rem}
+th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);background:var(--bg)}
+tr:last-child td{border-bottom:0}
+tr.proved td{background:var(--red-soft);font-weight:700}
+.cluecard{display:flex;gap:12px;align-items:flex-start;background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:12px;text-align:left;width:100%}
+.cluecard .cn{font-family:var(--f-display);font-size:1.1rem;flex:none;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:var(--tag);border:1.5px solid var(--gold)}
+.cluecard.herring .cn{background:var(--bg);border-style:dashed;border-color:var(--muted)}
+.cluecard .src{font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.cluecard .txt{font-size:.95rem}
+.clue-list{display:grid;gap:8px;grid-template-columns:1fr}
+@media (min-width:760px){.clue-list{grid-template-columns:1fr 1fr}}
+.check{display:flex;gap:10px;align-items:flex-start;padding:7px 0;border-bottom:1px dashed var(--line)}
+.check:last-child{border-bottom:0}
+.check input{width:20px;height:20px;margin-top:2px;accent-color:var(--pine);flex:none}
+.check.done span{text-decoration:line-through;color:var(--muted)}
+
+/* clue reveal overlay */
+.reveal{position:fixed;inset:0;z-index:50;background:rgba(10,17,15,.85);display:flex;align-items:center;justify-content:center;padding:calc(20px + env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) calc(20px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.evidence{background:#fffdf2;color:#16241f;max-width:560px;width:100%;border-radius:6px;padding:28px 24px 22px;position:relative;box-shadow:0 20px 60px rgba(0,0,0,.5);transform:rotate(-1deg)}
+.evidence::before{content:"";position:absolute;top:-10px;left:50%;width:90px;height:22px;margin-left:-45px;background:rgba(214,183,90,.7);transform:rotate(2deg)}
+.evidence .e-tag{font-family:var(--f-display);color:#b3202f;letter-spacing:.14em;font-size:.85rem}
+.evidence .e-num{font-family:var(--f-display);font-size:3rem;line-height:1;color:#b3202f}
+.evidence .e-txt{font-family:var(--f-display);font-size:clamp(1.2rem,4.5vw,1.6rem);line-height:1.45;margin-top:12px}
+.evidence .e-fmt{font-size:.8rem;color:#5b6b65;margin-top:14px;border-top:1px dashed #c9c2a8;padding-top:10px}
+.evidence .row{margin-top:16px;justify-content:flex-end}
+.evidence .btn{background:#fff;color:#16241f;border-color:#d5dedb}
+.note{font-size:.85rem;color:var(--muted)}
+</style>
+</head>
+<body>
+
+
+<header class="top">
+  <div class="wrap">
+    <div class="brand"><small>North Pole Police · Case 25-12</small><h1>Who Killed Santa?</h1></div>
+    <div class="stamp">CLASSIFIED</div>
+    <nav class="tabs" role="tablist" aria-label="Sections"></nav>
+  </div>
+</header>
+
+<main class="wrap" id="main"></main>
+
+<nav class="bottom" role="tablist" aria-label="Sections"></nav>
+
+<div class="timer" id="timer" hidden>
+  <div class="t-name" id="tName">Mission</div>
+  <div class="t-digits" id="tDigits">2:00</div>
+  <div class="row" style="justify-content:center">
+    <button id="tStart">Start</button>
+    <button id="tReset" class="ghost">Reset</button>
+    <button id="tClose" class="ghost">Close</button>
+  </div>
+  <div class="row" style="justify-content:center">
+    <button class="ghost" data-add="-30">−30s</button>
+    <button class="ghost" data-add="30">+30s</button>
+  </div>
+</div>
+
+<div class="reveal" id="reveal" hidden></div>
+
+<script>
+(function(){
+"use strict";
+/* ---------- storage ---------- */
+const KEY="wks-2026";
+function load(){try{return JSON.parse(localStorage.getItem(KEY))||{}}catch(e){return {}}}
+let S=Object.assign({tab:"case",team:0,grid:[{},{},{},{}],clues:[[],[],[],[]],notes:["","","",""],teams:null,gm:false,prep:{}},load());
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+if(!S.teams){S.teams=[0,1,2,3].map(i=>({name:"Team "+(i+1),sus:0,wep:0,room:0,mot:0,miss:0,show:0,early:0}))}
+
+/* ---------- data ---------- */
+const SUSPECTS=[
+ ["Mrs Claus","Santa's wife of 300 years","Santa forgot their anniversary again, and she's sick of baking 10,000 cookies a night.","“I was on a video call with my sister Merle in Bendigo all evening.”"],
+ ["Jingles, Head Wrapping Elf","Santa's most loyal elf, 412 years on the job","None known. “I love Santa!”","“I was asleep in the elf dorm by 11.”"],
+ ["Blitzen the Reindeer","Former front-of-sleigh reindeer","Demoted to the back of the sleigh for being slow.","“I was locked in the stables, snoring.”"],
+ ["Jack Frost","Spirit of winter","Santa refused, again, to bring snow to Australia.","“I was outside frosting windows.”"],
+ ["Krampus","Santa's horned, grumpy rival","Wants to take over the Naughty List.","“I was in Austria scaring naughty kids.”"],
+ ["The Easter Bunny","Head of Easter","Christmas chocolate sales keep beating Easter's.","“I was hiding eggs early, in Melbourne.”"]
+];
+const WEAPONS=[["Poisoned mince pie","A mince pie with a skull-and-crossbones flag"],["Giant candy cane","A large plastic candy cane"],["Tangle of fairy lights","A string of mini lights, a few bulbs smashed"],["Rock-hard Christmas pudding","A pudding in its cloth, or a painted rock"],["Snow globe","Any snow globe"],["Rigged bon bon","A cracker with “DANGER” written on it"]];
+const ROOMS=[["Kitchen","The kitchen"],["Toy Workshop","Garage or shed"],["Reindeer Stables","Backyard or lawn"],["Wrapping Room","Lounge room, where the tree is"],["Chimney","Fireplace, heater or barbecue"],["Sleigh Launchpad","Deck, verandah or trampoline"]];
+const MISSIONS=[
+ ["M1","Mitten Unwrap","A parcel wrapped in 15 layers. Take turns rolling a die; on a 6, put on oven mitts and unwrap until the next player rolls a 6.","Reach the middle",0,"Clue 5"],
+ ["M2","Free Jack Frost","The clue is frozen in a block of ice. No hot tap, no hammer. Hands, sunshine, salt and creativity are allowed.","Get the clue out",0,"Clue 6"],
+ ["M3","Reindeer Ring Toss","One player wears antlers; teammates throw rings from 2 metres.","5 ringers",120,"Clue 7 + a red herring"],
+ ["M4","Candy Cane Fishing","Holding a candy cane in your mouth, hook candy canes off a table into a bowl.","6 candy canes",90,"Clue 8"],
+ ["M5","Biscuit Face","Each player moves a biscuit from forehead to mouth with no hands. Film it.","All 3 players",120,"Clue 9"],
+ ["M6","Shredded Memo","Eight torn pieces of a memo are hidden around the house and yard, colour-coded by team.","Find all 8 and tape them together",0,"Clue 10"],
+ ["M7","Santa's Sack Relay","Pillowcase sack race, there and back, each player carrying a bauble on a spoon.","All 3 finish without dropping it",0,"Clue 11 + a red herring"],
+ ["M8","Christmas Charades","One player acts out: sleigh, carol, tinsel, pudding, reindeer, chimney.","5 out of 6",120,"Clue 12"]
+];
+const SHOWDOWN=[
+ ["S1","Hum That Carol","The Game Master shows a carol title to one player per team, who hums it. First team to buzz in correctly scores. 10 carols.","Most carols",0,"Everyone: Clues 13 and 16. Winner: Hunch Token + 3 points"],
+ ["S2","Lightning Trivia","15 quick questions mixing kid-friendly and adult questions. Teams write answers.","Most correct",0,"Everyone: Clues 14 and 15. Winner: Hunch Token + 3 points"]
+];
+const SPARES=["Snowman Melt: knock 10 ping-pong balls off cups with water pistols.","Bauble Tower: stack cups into a Christmas-tree pyramid in 60 seconds.","Elf Mummy: wrap a teammate in toilet paper in 90 seconds.","Blind Elf: talk a blindfolded player across the yard to collect a bell.","Christmas Drawing: one draws, the others guess 5 words in 2 minutes.","Mince Pie Memory: study 15 Christmas objects for 30 seconds, then name 12."];
+const CLUES=[
+ ["1","Crime scene","Prop: broken watch or clock","Santa's watch, smashed in the fall, stopped at 11:45pm."],
+ ["2","Crime scene","Card + a pinch of glitter in a bag","Santa's suit was covered in gold glitter, with strips of sticky tape stuck to his boots."],
+ ["3","Crime scene","Card + a broken mini bulb in a bag","The elf paramedics found a tiny broken coloured light bulb tangled in Santa's beard."],
+ ["4","Crime scene","Red herring: holiday brochure","A Byron Bay holiday brochure in Mrs Claus's handwriting: “Booked! Just me this year!!”",1],
+ ["5","M1 Mitten Unwrap","A real jingle bell with a tag","A small bell engraved “J” was found under the wrapping table. Every elf wears a bell with their initial on it."],
+ ["6","M2 Free Jack Frost","Frozen in a zip-lock bag","Jack Frost Fact Sheet: Jack melts at room temperature and never goes inside a heated room. Heated rooms tonight: Kitchen, Toy Workshop, Wrapping Room."],
+ ["7","M3 Ring Toss","Drawing or photo of a footprint","A small glittery boot print was found beside Santa, with a pointy, curled-up toe. No hoof marks, no paw prints, no icy bare feet."],
+ ["7b","M3 Ring Toss","Red herring: letter","A letter from Santa to Blitzen: “Sorry old friend, you're moving to the back of the sleigh. You're just too slow.”",1],
+ ["8","M4 Candy Cane Fishing","Invisible (UV) ink; torch at the Clue Desk","Elf Security inventory: the giant candy cane is still on the front door and the snow globe is still on Santa's desk. Both are covered in undisturbed dust."],
+ ["9","M5 Biscuit Face","Number code (A=1 … Z=26)","ALL TWENTY FOUR PIES STILL IN TIN. SANTA ON NO PIE DIET."],
+ ["10","M6 Shredded Memo","Torn into 8 pieces","Memo from Santa's office: “From 1 January, the new Wrap-o-Matic 3000 robot will replace all wrapping elves. Please do not tell Jingles yet.”"],
+ ["11","M7 Sack Relay","Card","Sleigh Launchpad report: Santa landed at 11:20pm, and his footprints in the snow lead straight down the stairs into the house. The Chimney fire has been roaring since 6pm."],
+ ["11b","M7 Sack Relay","Red herring: letter","A grumpy letter from the Easter Bunny: “Your chocolate sales beat mine AGAIN. This is your last Christmas, Claus.”",1],
+ ["12","M8 Charades","Printout of a video call screenshot","A screenshot of Mrs Claus on a video call with her sister Merle, timestamped 11:44pm. She's in her dressing gown, holding a cup of tea."],
+ ["13","S1 Hum That Carol","Word search","KITCHEN, WORKSHOP, STABLES LOCKED AT ELEVEN. NO ONE IN TILL MORNING."],
+ ["14","S2 Trivia","Card","The Christmas pudding is still in its cloth in the fridge, and the box of bon bons has never been opened."],
+ ["15","S2 Trivia","Mirror writing","Doorbell camera, Salzburg, Austria: Krampus scaring a naughty child at 11:45pm North Pole time."],
+ ["16","S1 Hum That Carol","Card + photo of a bare tree","The tree in the Wrapping Room is missing a string of fairy lights. Someone pulled them off in a hurry."]
+];
+/* unlock codes: the Game Master reads one out (or hands it on the clue card) once a team earns it */
+const CODES={TICKTOCK:["1"],SPARKLE:["2"],FLICKER:["3"],SUNSCREEN:["4"],SNOWFLAKE:["5"],GINGERBREAD:["6"],MISTLETOE:["7","7b"],NUTCRACKER:["8"],STOCKING:["9"],PAVLOVA:["10"],PRESENT:["11","11b"],WREATH:["12"],FIRESIDE:["13","16"],STARLIGHT:["14","15"]};
+const CODE_OF={};Object.keys(CODES).forEach(k=>CODES[k].forEach(id=>CODE_OF[id]=k));
+const CODE_ROWS=[["Crime scene card 1","TICKTOCK","1"],["Crime scene card 2","SPARKLE","2"],["Crime scene card 3","FLICKER","3"],["Crime scene card 4","SUNSCREEN","4"],["M1 Mitten Unwrap","SNOWFLAKE","5"],["M2 Free Jack Frost","GINGERBREAD","6"],["M3 Reindeer Ring Toss","MISTLETOE","7, 7b"],["M4 Candy Cane Fishing","NUTCRACKER","8"],["M5 Biscuit Face","STOCKING","9"],["M6 Shredded Memo","PAVLOVA","10"],["M7 Santa's Sack Relay","PRESENT","11, 11b"],["M8 Christmas Charades","WREATH","12"],["S1 Hum That Carol","FIRESIDE","13, 16"],["S2 Lightning Trivia","STARLIGHT","14, 15"]];
+const ELIM=[
+ ["Mrs Claus","Clue 12: video call screenshot at 11:44pm"],
+ ["Blitzen","Clue 7: boot print, not hooves; Clue 13: stables locked"],
+ ["Jack Frost","Clue 7: no icy bare feet; Clue 6: melts in heated rooms"],
+ ["Krampus","Clue 7: no hooves; Clue 15: doorbell camera in Austria"],
+ ["Easter Bunny","Clue 7: boot print, not paws"],
+ ["Jingles","Proved: Clue 5 bell, Clue 7 curled-toe boot, Clue 10 motive",1],
+ ["Mince pie","Clue 9: all 24 pies still in the tin"],
+ ["Candy cane, snow globe","Clue 8: both covered in undisturbed dust"],
+ ["Pudding, bon bon","Clue 14: pudding in the fridge, crackers sealed"],
+ ["Fairy lights","Proved: Clue 3 bulb in beard, Clue 16 lights missing",1],
+ ["Kitchen, Workshop, Stables","Clue 13: no entries after 11pm"],
+ ["Chimney, Launchpad","Clue 11: fire lit all night; footprints lead into the house"],
+ ["Wrapping Room","Proved: Clue 2 glitter and tape, Clue 5 bell, Clue 16",1]
+];
+const RUN=[
+ ["1. Briefing and crime scene","25 min","Read the briefing and alibis. Hand out case files. Teams search the taped-off scene.","Clues 1–4"],
+ ["2. Missions","60 min","Teams collect mission cards, complete them in any order, and trade proof for a clue envelope.","Clues 5–12"],
+ ["Lunch","Optional","Teams compare notes. No new clues.","None"],
+ ["3. Showdown","20 min","Two all-teams challenges. Everyone gets the clues; winners get a Hunch Token + 3 points.","Clues 13–16"],
+ ["4. Accusation and reveal","15 min","10 minutes to agree, then sealed accusations. Reveal the truth; Santa wakes up.","None"]
+];
+const PREP=[
+ ["A week or two before",["Pick 2 Game Masters and set 4 mixed-age teams","Print 4 case files and 4 copies of every clue card","Make the puzzle clues: invisible ink, number code, word search, mirror writing, torn memo","Put each mission's clues into labelled envelopes, 4 per mission","Write 10 carol titles and 15 trivia questions","Buy or find the props"]],
+ ["Props",["Crime scene: tape body outline, stuffed “Santa”, glitter, police tape","Weapons: mince pie, candy cane, fairy lights, pudding, snow globe, bon bon","Clue props: broken watch, broken mini bulb, jingle bell tagged “J”","Missions: wrapping paper, oven mitts, die, 4 ice-cream containers, antlers and rings, candy canes, biscuits, 3 pillowcases, spoons and baubles, UV pen and torch","Scoring: timer, small mirror, accusation envelopes, prizes","Optional: Santa suit for the finale, detective badges"]],
+ ["Christmas Eve",["Freeze clue 6 in 4 ice-cream containers of water","Hide 4 colour-coded sets of the 8 memo pieces"]],
+ ["Christmas morning",["Set up the crime scene and hide clues 1–4","Set up the Clue Desk with envelopes","Set out mission gear; keep ice blocks frozen until Round 2","Check biscuit and food allergies"]]
+];
+const POINTS=[["sus","Correct suspect",10,1],["wep","Correct weapon",5,1],["room","Correct room",5,1],["mot","Correct motive",5,1],["miss","Missions passed (1 each)",1,8],["show","Showdown wins (3 each)",3,2],["early","Early accusation (+5 / −5)",5,0]];
+const PIN="2512";
+
+/* ---------- helpers ---------- */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const ICONS={
+ case:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h6l2 2h10v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/></svg>',
+ notebook:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="10.5" cy="10.5" r="6"/><path d="m15 15 6 6"/></svg>',
+ missions:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2M9 2h6"/></svg>',
+ scores:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0zM7 6H4a3 3 0 0 0 3 4M17 6h3a3 3 0 0 1-3 4"/></svg>',
+ gm:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>'
+};
+const TABS=[["case","Case file"],["notebook","Notebook"],["missions","Missions"],["scores","Scores"],["gm","Game Master"]];
+
+function nav(){
+  const mk=(short)=>TABS.map(([k,l])=>`<button role="tab" data-tab="${k}" aria-selected="${S.tab===k}">${short?ICONS[k]:""}<span>${short&&k==="gm"?"GM":short&&k==="case"?"Case":l}</span></button>`).join("");
+  document.querySelector("nav.tabs").innerHTML=mk(false);
+  document.querySelector("nav.bottom").innerHTML=mk(true);
+}
+document.addEventListener("click",e=>{const b=e.target.closest("[data-tab]");if(b){go(b.dataset.tab)}});
+function go(t){S.tab=t;save();nav();render();window.scrollTo(0,0);try{history.replaceState(null,"","#"+t)}catch(e){}}
+
+/* ---------- panels ---------- */
+function pCase(){
+  return `<section class="panel">
+   <div class="stack"><div class="eyebrow">Christmas Eve, 11:45pm</div>
+   <h2>Santa has been found out cold on the floor of the North Pole.</h2>
+   <p class="lede">Six suspects were nearby, and every one of them had a reason. Win clues by completing missions, rule suspects, weapons and rooms in or out, then make your accusation: <b>who did it, with what, where, and why</b>.</p></div>
+   <div class="stack"><div class="eyebrow">Briefing · Game Master reads aloud</div>
+   <div class="brief">Detectives, thank you for coming at such short notice. At 11:45 last night, Christmas Eve, Santa Claus was found unconscious, tangled and covered in glitter. The elf paramedics say he'll be fine, but he can't remember a thing. Christmas is in danger. Six suspects were nearby, and each had a reason to want Santa out of the way. Your job: find out who did it, what they used, where it happened, and why. Clues won't come free. You'll have to earn them. The first team to crack the case saves Christmas. Good luck.</div></div>
+   <div class="stack"><div class="eyebrow">The suspects</div><div class="grid-cards">
+   ${SUSPECTS.map((s,i)=>`<article class="suspect"><span class="num">No. ${i+1}</span><h3>${esc(s[0])}</h3><div class="who">${esc(s[1])}</div><dl class="kv"><dt>Motive</dt><dd>${esc(s[2])}</dd><dt>Alibi</dt><dd>${esc(s[3])}</dd></dl></article>`).join("")}
+   </div></div>
+   <div class="stack"><div class="eyebrow">The weapons</div><div class="chips">${WEAPONS.map(w=>`<span class="chip">${esc(w[0])}</span>`).join("")}</div></div>
+   <div class="stack"><div class="eyebrow">The rooms</div><div class="chips">${ROOMS.map(r=>`<span class="chip">${esc(r[0])} · <b>${esc(r[1])}</b></span>`).join("")}</div></div>
+   <div class="box stack"><h3>How the game runs</h3>
+   <div class="tbl" style="box-shadow:none"><table><thead><tr><th>Round</th><th>Time</th><th>What happens</th></tr></thead><tbody>
+   ${RUN.map(r=>`<tr><td><b>${esc(r[0])}</b></td><td style="white-space:nowrap">${esc(r[1])}</td><td>${esc(r[2])}</td></tr>`).join("")}</tbody></table></div>
+   <p class="note"><b>Hunch Token:</b> ask a Game Master one yes/no question, but not one naming a suspect, weapon and room together. <b>Early accusation:</b> after Round 2, correct earns +5; wrong costs 5 points and 5 minutes on desk duty.</p></div>
+  </section>`;
+}
+
+function nbList(kind,items){
+  const g=S.grid[S.team]||(S.grid[S.team]={});
+  return `<div class="box stack"><h3>${kind==="s"?"Who":kind==="w"?"What":"Where"}</h3><div class="nb-list">
+  ${items.map((it,i)=>{const k=kind+i,st=g[k]||"";const m={x:"✕",q:"?",y:"✓"}[st]||"";
+   return `<button class="nb-item" data-nb="${k}" data-s="${st}"><span class="mark">${m}</span><span class="label">${esc(it[0])}</span></button>`}).join("")}</div></div>`;
+}
+function pNotebook(){
+  const got=S.clues[S.team]||[];
+  const mine=CLUES.map((c,i)=>[c,i]).filter(([c])=>got.includes(c[0]));
+  return `<section class="panel">
+  <div class="stack"><div class="eyebrow">Detective's notebook</div><h2>Rule them out, one clue at a time.</h2>
+  <p class="lede">Choose your team, then tap an option to mark it. Each tap cycles: ruled out, suspicious, it's this one, blank. Notes stay on this device.</p></div>
+  <div class="teampick">${S.teams.map((t,i)=>`<button data-team="${i}" aria-pressed="${S.team===i}">${esc(t.name)}</button>`).join("")}</div>
+  <div class="legend"><span>✕ ruled out</span><span>? suspicious</span><span>✓ it's this one</span></div>
+  <div class="nb-cols">${nbList("s",SUSPECTS)}${nbList("w",WEAPONS)}${nbList("r",ROOMS)}</div>
+  <div class="box stack"><h3>Evidence locker</h3><p class="note">Earned a clue? The Game Master gives you a code word. Type it here to unlock the clue for ${esc(S.teams[S.team].name)}.</p>
+   <form class="row" id="unlockForm" style="flex-wrap:nowrap"><input id="code" type="text" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="Code word" style="flex:1;min-width:0;text-transform:uppercase"><button class="btn primary" type="submit">Unlock</button></form>
+   <p class="note" id="codeMsg" aria-live="polite"></p>
+   ${mine.length?`<div class="clue-list">${mine.map(([c,i])=>`<button class="cluecard${c[4]?" herring":""}" data-myclue="${i}"><span class="cn">${c[0]}</span><span class="stack" style="gap:2px;min-width:0"><span class="src">${esc(c[1])}</span><span class="txt">${esc(c[3])}</span></span></button>`).join("")}</div>`:`<p class="muted">No clues unlocked yet. Search the crime scene and complete missions to earn them.</p>`}
+   <p class="note">${mine.length} of ${CLUES.length} clues unlocked. Tap a clue to show it full screen.</p></div>
+  <div class="box stack"><h3>Number code decoder</h3><p class="note">Type numbers with dashes between letters and slashes between words, e.g. 19-1-14-20-1 / 3-12-1-21-19</p>
+   <input id="dec" type="text" inputmode="numeric" autocomplete="off" placeholder="Type the numbers from your clue">
+   <div class="decoded" id="decOut" aria-live="polite"></div></div>
+  <div class="box stack"><h3>Team notes</h3><textarea id="notes" placeholder="Theories, hunches, arguments…">${esc(S.notes[S.team]||"")}</textarea></div>
+  </section>`;
+}
+function decode(s){return s.split("/").map(w=>w.split(/[-\s,.]+/).filter(Boolean).map(n=>{n=parseInt(n,10);return n>=1&&n<=26?String.fromCharCode(64+n):"?"}).join("")).join(" ")}
+
+function mCard(m,show){
+  return `<article class="mission${show?" show":""}"><div class="code">${m[0]}</div><h3>${esc(m[1])}</h3><p>${esc(m[2])}</p>
+  <div class="meta"><span><b>To pass:</b> ${esc(m[3])}${m[4]?" in "+fmt(m[4]):""}</span><span><b>Earns:</b> ${esc(m[5])}</span></div>
+  <div class="acts">${m[4]?`<button class="btn primary sm" data-timer="${m[4]}" data-tn="${esc(m[1])}">Start ${fmt(m[4])} timer</button>`:""}
+  <button class="btn sm" data-timer="${m[4]||0}" data-tn="${esc(m[1])}" data-up="${m[4]?0:1}">${m[4]?"Stopwatch":"Stopwatch (for bragging rights)"}</button></div></article>`;
+}
+function pMissions(){
+  return `<section class="panel">
+  <div class="stack"><div class="eyebrow">Round 2 · 60 minutes</div><h2>Complete a mission, earn a clue.</h2>
+  <p class="lede">Do missions in any order. Show the Game Master proof to get a code word, then unlock your clue in the Evidence locker on the Notebook tab. Failed? Do another mission first, then try again.</p></div>
+  <div class="stack">${MISSIONS.map(m=>mCard(m)).join("")}</div>
+  <div class="stack"><div class="eyebrow">Round 3 · Showdown, all teams at once</div>${SHOWDOWN.map(m=>mCard(m,1)).join("")}</div>
+  <div class="box stack"><h3>Spare missions</h3><p class="note">Swap one in if a mission doesn't suit the crowd or the weather.</p>
+  <ul style="margin:0;padding-left:20px;display:flex;flex-direction:column;gap:4px">${SPARES.map(s=>`<li>${esc(s)}</li>`).join("")}</ul></div>
+  </section>`;
+}
+
+function total(t){return t.sus*10+t.wep*5+t.room*5+t.mot*5+t.miss+t.show*3+t.early*5}
+function pScores(){
+  const tots=S.teams.map(total),max=Math.max(...tots);
+  const order=[...tots].sort((a,b)=>b-a);
+  return `<section class="panel">
+  <div class="stack"><div class="eyebrow">Scoreboard</div><h2>Who's closest to saving Christmas?</h2>
+  <p class="lede">Tap a team name to rename it. Scores are kept on this device, so keep them on the Game Master's phone or iPad.</p></div>
+  <div class="teams">${S.teams.map((t,i)=>{const tot=tots[i];const rk=order.indexOf(tot)+1;
+   return `<div class="team${tot===max&&max>0?" lead":""}"><div class="head"><input id="tn${i}" data-tname="${i}" value="${esc(t.name)}" aria-label="Team name"><div class="total">${tot}</div></div>
+   <div class="rank">${max>0?["1st","2nd","3rd","4th"][rk-1]+" place":" "}</div>
+   <div class="pts">${POINTS.map(([k,l,v,mx])=>{
+     if(mx===1){return `<div class="pt tog"><span>${l} <span class="muted">(${v})</span></span><span></span><span></span><button class="${t[k]?"on":""}" data-pt="${i}:${k}:t" aria-pressed="${!!t[k]}" aria-label="${l}">${t[k]?"✓":""}</button></div>`}
+     return `<div class="pt"><span>${l}</span><button data-pt="${i}:${k}:-1" aria-label="Minus">−</button><span class="n">${t[k]}</span><button data-pt="${i}:${k}:1" aria-label="Plus">+</button></div>`}).join("")}</div></div>`}).join("")}</div>
+  <div class="row"><button class="btn" id="resetScores">Reset scores</button><span class="note" id="resetMsg"></span></div>
+  <p class="note">Tie-break: the team that handed in its accusation first.</p>
+  </section>`;
+}
+
+function pGM(){
+  if(!S.gm){return `<section class="panel"><div class="stack"><div class="eyebrow">Game Masters only</div><h2>Top secret. No detectives past this point.</h2>
+   <p class="lede">The solution, every clue card, and the prep list live here. Enter the PIN to unlock.</p></div>
+   <form class="box stack lock" id="lockForm"><label for="pin"><b>PIN</b> <span class="muted">(it's Christmas Day, as four digits: day then month)</span></label>
+   <input id="pin" type="password" inputmode="numeric" autocomplete="off" maxlength="4"><button class="btn primary" type="submit">Unlock</button><p class="note" id="pinMsg" aria-live="polite"></p></form></section>`}
+  return `<section class="panel">
+  <div class="row"><div class="eyebrow">Game Masters only</div><button class="btn sm" id="lockBtn" style="margin-left:auto">Lock</button></div>
+  <div class="solution stack"><div class="eyebrow">The solution</div>
+   <p class="big">Jingles the Head Wrapping Elf, with the tangle of fairy lights, in the Wrapping Room.</p>
+   <p><b>Motive:</b> Jingles found a memo saying Santa would replace all wrapping elves with the Wrap-o-Matic 3000 robot from 1 January.</p>
+   <p><b>What happened:</b> Santa landed at 11:20pm and went to the Wrapping Room to check the last presents. Jingles confronted him, they argued, and Jingles wrapped him in fairy lights and sticky tape until he toppled over at 11:45, smashing his watch. Jingles fled to the dorm but dropped their engraved bell under the wrapping table.</p>
+   <p><b>Finale:</b> “Santa” staggers in, rubbing his head: “Jingles! I was going to tell you, the robot was only for the sticky tape!” Jingles is forgiven and Christmas is saved.</p></div>
+  <div class="stack"><h3>Clue cards</h3><p class="note">Tap a card to show it full screen, handy on an iPad at the Clue Desk. Dashed numbers are red herrings.</p>
+   <div class="clue-list">${CLUES.map((c,i)=>`<button class="cluecard${c[4]?" herring":""}" data-clue="${i}"><span class="cn">${c[0]}</span><span class="stack" style="gap:2px;min-width:0"><span class="src">${esc(c[1])} · ${esc(c[2])} · Code: ${CODE_OF[c[0]]}</span><span class="txt">${esc(c[3])}</span></span></button>`).join("")}</div></div>
+  <div class="stack"><h3>Clue codes</h3><p class="note">When a team earns a clue, tell them the code word (or write it on the physical clue card). They type it into the Evidence locker on their Notebook tab to unlock the clue.</p>
+   <div class="tbl"><table><thead><tr><th>Earned from</th><th>Code word</th><th>Unlocks clue</th></tr></thead><tbody>
+   ${CODE_ROWS.map(r=>`<tr><td>${esc(r[0])}</td><td style="font-family:var(--f-display);font-size:1rem">${r[1]}</td><td>${r[2]}</td></tr>`).join("")}</tbody></table></div></div>
+  <div class="stack"><h3>What rules out what</h3><div class="tbl"><table><thead><tr><th>Option</th><th>Ruled out or proved by</th></tr></thead><tbody>
+   ${ELIM.map(e=>`<tr class="${e[2]?"proved":""}"><td>${esc(e[0])}</td><td>${esc(e[1])}</td></tr>`).join("")}</tbody></table></div>
+   <p class="note">Red herrings 4, 7b and 11b give Mrs Claus, Blitzen and the Easter Bunny juicy motives but no evidence.</p></div>
+  <div class="stack"><h3>Prep checklist</h3><div class="nb-cols">
+   ${PREP.map((g,gi)=>`<div class="box"><h3 style="font-size:1rem;margin-bottom:6px">${esc(g[0])}</h3>${g[1].map((it,ii)=>{const k=gi+"-"+ii,d=!!S.prep[k];return `<label class="check${d?" done":""}"><input type="checkbox" id="pp${k}" data-prep="${k}" ${d?"checked":""}><span>${esc(it)}</span></label>`}).join("")}</div>`).join("")}</div></div>
+  <div class="box stack"><h3>New game</h3><p class="note">Clears every team's notebook, clue ticks, notes and scores on this device.</p>
+   <div class="row"><button class="btn" id="wipe">Clear all game data</button><span class="note" id="wipeMsg"></span></div></div>
+  </section>`;
+}
+
+function render(){
+  const m=$("#main");
+  m.innerHTML={case:pCase,notebook:pNotebook,missions:pMissions,scores:pScores,gm:pGM}[S.tab]();
+  bind();
+}
+
+/* ---------- interactions ---------- */
+function bind(){
+  document.querySelectorAll("[data-team]").forEach(b=>b.onclick=()=>{S.team=+b.dataset.team;save();render()});
+  document.querySelectorAll("[data-nb]").forEach(b=>b.onclick=()=>{
+    const g=S.grid[S.team]||(S.grid[S.team]={});const nx={"":"x",x:"q",q:"y",y:""}[g[b.dataset.nb]||""];
+    g[b.dataset.nb]=nx;save();b.dataset.s=nx;b.querySelector(".mark").textContent={x:"✕",q:"?",y:"✓"}[nx]||"";
+  });
+  const uf=$("#unlockForm");if(uf){uf.onsubmit=e=>{e.preventDefault();
+    const raw=$("#code").value.toUpperCase().replace(/[^A-Z]/g,"");const ids=CODES[raw];
+    if(!ids){$("#codeMsg").textContent=raw?"That code doesn't match any clue. Check the spelling with the Game Master.":"Type a code word first.";return}
+    const a=S.clues[S.team]||(S.clues[S.team]=[]);const fresh=ids.filter(id=>!a.includes(id));
+    fresh.forEach(id=>a.push(id));save();render();
+    $("#codeMsg").textContent=fresh.length?"Unlocked clue "+fresh.join(" and ")+".":"You already have clue "+ids.join(" and ")+".";
+    if(fresh.length){const first=CLUES.findIndex(c=>c[0]===fresh[0]);showClue(first,myList())}
+  }}
+  document.querySelectorAll("[data-myclue]").forEach(b=>b.onclick=()=>showClue(+b.dataset.myclue,myList()));
+  const dec=$("#dec");if(dec){dec.oninput=()=>{$("#decOut").textContent=decode(dec.value)}}
+  const notes=$("#notes");if(notes){notes.oninput=()=>{S.notes[S.team]=notes.value;save()}}
+  document.querySelectorAll("[data-timer]").forEach(b=>b.onclick=()=>openTimer(b.dataset.tn,+b.dataset.timer,b.dataset.up==="1"||+b.dataset.timer===0||b.textContent.trim()==="Stopwatch"));
+  document.querySelectorAll("[data-tname]").forEach(inp=>inp.onchange=()=>{S.teams[+inp.dataset.tname].name=inp.value.trim()||("Team "+(+inp.dataset.tname+1));save()});
+  document.querySelectorAll("[data-pt]").forEach(b=>b.onclick=()=>{
+    const [i,k,d]=b.dataset.pt.split(":");const t=S.teams[+i];const P=POINTS.find(p=>p[0]===k);
+    if(d==="t")t[k]=t[k]?0:1;else{let v=t[k]+ +d;if(P[3]>0)v=Math.max(0,Math.min(P[3],v));else v=Math.max(-1,Math.min(1,v));t[k]=v}
+    save();render();
+  });
+  const rs=$("#resetScores");if(rs){let armed=false;rs.onclick=()=>{if(!armed){armed=true;rs.textContent="Tap again to reset";$("#resetMsg").textContent="This clears all four scores.";setTimeout(()=>{armed=false;if(rs.isConnected){rs.textContent="Reset scores";$("#resetMsg").textContent=""}},4000);return}
+    S.teams.forEach(t=>{["sus","wep","room","mot","miss","show","early"].forEach(k=>t[k]=0)});save();render()}}
+  const lf=$("#lockForm");if(lf){lf.onsubmit=e=>{e.preventDefault();if($("#pin").value===PIN){S.gm=true;save();render()}else{$("#pinMsg").textContent="That PIN isn't right. Try again.";$("#pin").value=""}}}
+  const lb=$("#lockBtn");if(lb){lb.onclick=()=>{S.gm=false;save();render()}}
+  document.querySelectorAll("[data-clue]").forEach(b=>b.onclick=()=>showClue(+b.dataset.clue));
+  document.querySelectorAll("[data-prep]").forEach(c=>c.onchange=()=>{S.prep[c.dataset.prep]=c.checked;save();c.closest(".check").classList.toggle("done",c.checked)});
+  const w=$("#wipe");if(w){let armed=false;w.onclick=()=>{if(!armed){armed=true;w.textContent="Tap again to clear";$("#wipeMsg").textContent="This can't be undone.";setTimeout(()=>{armed=false;if(w.isConnected){w.textContent="Clear all game data";$("#wipeMsg").textContent=""}},4000);return}
+    const names=S.teams.map(t=>t.name);S.grid=[{},{},{},{}];S.clues=[[],[],[],[]];S.notes=["","","",""];S.prep={};
+    S.teams=names.map(n=>({name:n,sus:0,wep:0,room:0,mot:0,miss:0,show:0,early:0}));save();render()}}
+}
+
+/* clue reveal */
+const rv=$("#reveal");
+function myList(){const a=S.clues[S.team]||[];return CLUES.map((c,i)=>a.includes(c[0])?i:-1).filter(i=>i>=0)}
+function showClue(i,list){list=list||CLUES.map((_,k)=>k);const pos=list.indexOf(i),pv=list[pos-1],nx=list[pos+1];const c=CLUES[i];
+  rv.innerHTML=`<div class="evidence" role="dialog" aria-label="Clue ${c[0]}"><div class="e-tag">${c[4]?"EVIDENCE · UNVERIFIED":"EVIDENCE · CASE 25-12"}</div><div class="e-num">#${c[0]}</div><div class="e-txt">${esc(c[3])}</div><div class="e-fmt">${esc(c[1])} · ${esc(c[2])}</div>
+  <div class="row"><button class="btn" data-cl="${pv}" ${pv===undefined?"disabled":""}>Previous</button><button class="btn" data-cl="${nx}" ${nx===undefined?"disabled":""}>Next</button><button class="btn" id="rvClose">Close</button></div></div>`;
+  rv.hidden=false;
+  rv.querySelectorAll("[data-cl]").forEach(b=>b.onclick=ev=>{ev.stopPropagation();showClue(+b.dataset.cl,list)});
+  $("#rvClose").onclick=()=>{rv.hidden=true};
+}
+rv.addEventListener("click",e=>{if(e.target===rv)rv.hidden=true});
+
+/* timer */
+const tm=$("#timer");let tLeft=0,tBase=0,tUp=false,tRun=null,tEnd=0,tStartAt=0,lock=null,actx=null;
+function fmt(s){s=Math.max(0,Math.round(s));return Math.floor(s/60)+":"+String(s%60).padStart(2,"0")}
+function draw(){$("#tDigits").textContent=fmt(tLeft)}
+function openTimer(name,secs,up){tUp=up||!secs;tBase=tUp?0:secs;tLeft=tBase;stop();tm.classList.remove("done");$("#tName").textContent=name;$("#tStart").textContent="Start";draw();tm.hidden=false;
+  try{navigator.wakeLock&&navigator.wakeLock.request("screen").then(l=>lock=l).catch(()=>{})}catch(e){}}
+function stop(){if(tRun){clearInterval(tRun);tRun=null}}
+function beep(){try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();[0,.35,.7].forEach(d=>{const o=actx.createOscillator(),g=actx.createGain();o.frequency.value=880;o.connect(g);g.connect(actx.destination);g.gain.setValueAtTime(.3,actx.currentTime+d);g.gain.exponentialRampToValueAtTime(.001,actx.currentTime+d+.3);o.start(actx.currentTime+d);o.stop(actx.currentTime+d+.3)})}catch(e){}}
+$("#tStart").onclick=()=>{
+  try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();actx.resume&&actx.resume()}catch(e){}
+  if(tRun){stop();$("#tStart").textContent="Resume";return}
+  if(!tUp&&tLeft<=0)return;
+  $("#tStart").textContent="Pause";
+  if(tUp){tStartAt=Date.now()-tLeft*1000;tRun=setInterval(()=>{tLeft=(Date.now()-tStartAt)/1000;draw()},200)}
+  else{tEnd=Date.now()+tLeft*1000;tRun=setInterval(()=>{tLeft=(tEnd-Date.now())/1000;if(tLeft<=0){tLeft=0;stop();tm.classList.add("done");$("#tStart").textContent="Start";beep()}draw()},200)}
+};
+$("#tReset").onclick=()=>{stop();tLeft=tBase;tm.classList.remove("done");$("#tStart").textContent="Start";draw()};
+$("#tClose").onclick=()=>{stop();tm.hidden=true;try{lock&&lock.release()}catch(e){}lock=null};
+tm.querySelectorAll("[data-add]").forEach(b=>b.onclick=()=>{const d=+b.dataset.add;tLeft=Math.max(0,tLeft+d);if(tRun&&!tUp)tEnd+=d*1000;if(tRun&&tUp)tStartAt-=d*1000;if(!tRun&&!tUp)tBase=Math.max(0,tBase+d);tm.classList.remove("done");draw()});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"){if(!rv.hidden)rv.hidden=true;else if(!tm.hidden)$("#tClose").click()}});
+
+/* boot */
+const h=(location.hash||"").slice(1);if(TABS.some(t=>t[0]===h))S.tab=h;
+nav();render();
+})();
+</script>
+
+</body>
+</html>
